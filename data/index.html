@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontrol Lampu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <h2>Kontrol Lampu</h2>
+            <div class="connection-status">
+                <span id="connectionDot" class="dot offline"></span>
+            </div>
+        </div>
+        
+        <div class="icon-container">
+            <svg id="bulbIcon" viewBox="0 0 24 24" onclick="toggleLamp()">
+                <path class="bulb-glass" d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7z"/>
+                <path class="bulb-base" d="M10 20h4c0 1.1-.9 2-2 2s-2-.9-2-2z"/>
+            </svg>
+        </div>
+        
+        <p class="status-text">Status: <strong id="status">Menghubungkan...</strong></p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
