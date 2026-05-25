@@ -6,7 +6,7 @@ static bool ledState = false;
 
 void setupLED() {
   pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, LOW); // matikan awal
+  digitalWrite(LED_PIN, LOW);
 }
 
 void turnOnLED() {

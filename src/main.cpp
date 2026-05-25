@@ -14,5 +14,4 @@ void setup() {
 
 void loop() {
   server.handleClient();
-  delay(2);
 }

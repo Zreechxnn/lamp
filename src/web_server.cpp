@@ -32,16 +32,16 @@ void setupWebServer() {
   server.on("/status", HTTP_GET, handleStatus);
 
   server.on("/", HTTP_GET, []() {
-    if (LittleFS.exists("/index.html")) {
-      File file = LittleFS.open("/index.html", "r");
+    File file = LittleFS.open("/index.html", "r");
+    if (file) {
       server.streamFile(file, "text/html");
       file.close();
     } else {
-      server.send(200, "text/html", "<h1>❌ File HTML Hilang!</h1><p>Pastikan Upload Filesystem Image berhasil.</p>");
+      server.send(404, "text/plain", "index.html not found");
     }
   });
 
-  server.serveStatic("/", LittleFS, "/");
+  server.serveStatic("/", LittleFS, "/", "max-age=3600");
 
   server.onNotFound([]() {
     server.send(404, "text/plain", "Halaman tidak ditemukan");
