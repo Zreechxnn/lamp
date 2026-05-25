@@ -12,25 +12,29 @@ function updateUI(state, isConnected = true) {
         statusSpan.style.color = '#94a3b8';
         bulbIcon.classList.remove('nyala');
         bulbIcon.style.pointerEvents = 'none';
-        document.body.classList.remove('day-mode'); // Putus = Malam / Gelap
+        document.body.classList.remove('night-mode'); // reset
         return;
     }
 
     connectionDot.className = 'dot online';
-    bulbIcon.style.pointerEvents = 'auto'; 
+    bulbIcon.style.pointerEvents = 'auto';
 
     if (state === 'ON') {
+        document.querySelector('.icon-container').classList.add('nyala');
         currentState = 'ON';
         statusSpan.innerText = 'MENYALA';
         statusSpan.style.color = '#10b981';
         bulbIcon.classList.add('nyala');
-        document.body.classList.add('day-mode'); // Nyala = Siang
+        document.body.classList.remove('night-mode');
+        document.body.classList.add('day-mode');
     } else if (state === 'OFF') {
+        document.querySelector('.icon-container').classList.remove('nyala');
         currentState = 'OFF';
         statusSpan.innerText = 'MATI';
         statusSpan.style.color = '#ef4444';
         bulbIcon.classList.remove('nyala');
-        document.body.classList.remove('day-mode'); // Mati = Malam
+        document.body.classList.remove('day-mode');
+        document.body.classList.add('night-mode');
     }
 }
 
@@ -58,7 +62,7 @@ async function fetchState(url) {
 }
 
 function toggleLamp() {
-    if (isFetching) return; 
+    if (isFetching) return;
     const action = currentState === 'ON' ? 'off' : 'on';
     fetchState('/' + action);
 }

@@ -1,26 +1,50 @@
+/* ========== VARIABEL WARNA & POSISI CELESTIAL ========== */
 :root {
-    /* --- WARNA MODE MALAM (DEFAULT) --- */
+    /* Default: Malam (lampu mati) */
     --bg-color: #0f172a;
-    --card-bg: rgba(30, 41, 59, 0.4); 
+    --card-bg: rgba(30, 41, 59, 0.4);
     --card-border: rgba(255, 255, 255, 0.08);
-    --success: #10b981;
-    --danger: #ef4444;
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
     --glass-blur: blur(12px);
+    --cloud-opacity: 0;
+    --cloud-shadow: none;
+    --star-opacity: 1;
+    --moon-opacity: 1;
+    --sun-opacity: 0;
+    --bulb-glow: 0 0 60px 10px rgba(251, 191, 36, 0.7);
+    --shooting-star-opacity: 1;
+
+    /* --- UPDATE: Rotasi Searah Jarum Jam (Malam) --- */
+    /* Bulan di atas (0deg), Matahari standby di kiri bawah (-110deg) */
+    --moon-rotation: 0deg;
+    --sun-rotation: -110deg; 
+    --celestial-pivot-y: calc(100vh + 30vh); 
 }
 
 body.day-mode {
-    /* --- WARNA MODE SIANG --- */
+    /* Siang (lampu menyala) */
     --bg-color: #38bdf8;
-    /* Kotak semi-transparan terang */
-    --card-bg: rgba(255, 255, 255, 0.3); 
+    --card-bg: rgba(255, 255, 255, 0.3);
     --card-border: rgba(255, 255, 255, 0.3);
     --text-main: #1e293b;
     --text-muted: #475569;
     --glass-blur: blur(10px);
+    --cloud-opacity: 1;
+    --cloud-shadow: 0 10px 25px -5px rgba(0,0,0,0.15);
+    --star-opacity: 0;
+    --moon-opacity: 0;
+    --sun-opacity: 1;
+    --bulb-glow: 0 0 60px 10px rgba(251, 191, 36, 0.8);
+    --shooting-star-opacity: 0;
+
+    /* --- UPDATE: Rotasi Searah Jarum Jam (Siang) --- */
+    /* Bulan terbenam ke kanan bawah (110deg), Matahari naik ke atas (0deg) */
+    --moon-rotation: 110deg;
+    --sun-rotation: 0deg;
 }
 
+/* ========== GLOBAL ========== */
 body {
     font-family: 'Segoe UI', system-ui, sans-serif;
     background-color: var(--bg-color);
@@ -31,24 +55,24 @@ body {
     min-height: 100vh;
     margin: 0;
     transition: background-color 1.5s ease-in-out, color 1s ease;
-    overflow: hidden; /* Mencegah scrollbar karena awan/tata surya bergerak di luar layar */
+    overflow: hidden;
 }
 
+/* ========== KARTU KACA ========== */
 .card {
     background: var(--card-bg);
     width: 90%;
     max-width: 350px;
     padding: 30px;
     border-radius: 24px;
-    /* Efek Kaca Buram (Glassmorphism) */
-    backdrop-filter: var(--glass-blur); 
+    backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--card-border); 
+    border: 1px solid var(--card-border);
     box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
     text-align: center;
-    transition: background 1.5s ease, border 1.5s ease, backdrop-filter 1.5s ease;
+    transition: background 1.5s ease, border 1.5s ease, box-shadow 1.5s ease;
     position: relative;
-    z-index: 10; /* Pastikan selalu di depan lapisan scenery */
+    z-index: 10;
 }
 
 .header {
@@ -57,7 +81,6 @@ body {
     align-items: center;
     margin-bottom: 20px;
 }
-
 .header h2 {
     margin: 0;
     font-size: 1.25rem;
@@ -71,10 +94,10 @@ body {
     display: inline-block;
     transition: background-color 0.3s;
 }
-.dot.online { background-color: var(--success); box-shadow: 0 0 8px var(--success); }
-.dot.offline { background-color: var(--danger); }
+.dot.online { background-color: #10b981; box-shadow: 0 0 8px #10b981; }
+.dot.offline { background-color: #ef4444; }
 
-/* Ikon Lampu */
+/* ========== IKON LAMPU + SINAR ========== */
 .icon-container {
     margin: 40px 0;
     position: relative;
@@ -82,76 +105,102 @@ body {
     justify-content: center;
 }
 
+/* Lingkaran sinar di belakang bohlam */
+.icon-container::before {
+    content: '';
+    position: absolute;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(251,191,36,0.6) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    pointer-events: none;
+    z-index: 0;
+}
+.icon-container.nyala::before {
+    opacity: 1;
+}
+
 #bulbIcon {
     width: 150px; height: 150px;
-    overflow: visible;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+    z-index: 1;
 }
-#bulbIcon:active { transform: scale(0.92); } /* Animasi membal saat ditekan */
+#bulbIcon:active { transform: scale(0.92); }
 
-.bulb-glass { fill: #475569; transition: fill 0.4s ease; }
+.bulb-glass { fill: #475569; transition: fill 0.4s ease, filter 0.4s ease; }
 .bulb-base { fill: #94a3b8; }
 
 .nyala .bulb-glass {
     fill: #fbbf24;
-    filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.8)); /* Efek cahaya menyala */
+    filter: drop-shadow(0 0 20px rgba(251,191,36,0.9)) drop-shadow(0 0 40px rgba(251,191,36,0.6));
 }
 
 .status-text { font-size: 1.2rem; margin-bottom: 10px; }
 #status { letter-spacing: 1px; }
 
+/* ========== PEMANDANGAN ========== */
 .scenery {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 1; /* Berada tepat di belakang card */
-    pointer-events: none; /* Agar klik dari user tembus ke card */
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden; /* Pastikan benda langit yang sembunyi tidak buat scrollbar */
 }
 
-/* --- BULAN (MALAM HARI) --- */
 .moon {
     position: absolute;
     width: 80px; height: 80px;
     border-radius: 50%;
-    box-shadow: inset -20px 5px 0 0px #e2e8f0; /* Membentuk bulan sabit */
-    top: 10%; 
-    left: 15%; /* Pojok kiri atas */
-    transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-    opacity: 1;
-}
-body.day-mode .moon {
-    top: 120%; /* Tenggelam ke bawah saat siang */
-    opacity: 0;
+    box-shadow: inset -20px 5px 0 0px #e2e8f0;
+    
+    /* --- UPDATE POSISI DASAR --- */
+    top: 10vh; /* Jarak dari atas layar saat di apex */
+    left: 50%;
+    margin-left: -40px; /* Tengahkan horizontal (setengah width) */
+    
+    /* --- UPDATE TRANSISI MOBILITAS --- */
+    opacity: var(--moon-opacity);
+    transform: rotate(var(--moon-rotation));
+    transform-origin: center var(--celestial-pivot-y); /* Pusat putaran di horizon */
+    
+    /* Tambahkan transform ke transition agar mulus */
+    transition: opacity 1.5s ease, transform 1.5s ease-in-out; 
 }
 
-/* --- MATAHARI (SIANG HARI) --- */
+/* MATAHARI */
 .sun {
     position: absolute;
     width: 110px; height: 110px;
     background: #fcd34d;
     border-radius: 50%;
-    box-shadow: 0 0 70px #fbbf24, 0 0 120px rgba(251, 191, 36, 0.5);
-    top: 120%; /* Sembunyi di bawah saat malam */
-    right: 15%; /* Pojok kanan atas */
-    left: auto;
-    transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-    opacity: 0;
-}
-body.day-mode .sun {
-    top: 10%; /* Terbit ke atas saat siang */
-    opacity: 1;
+    box-shadow: 0 0 70px #fbbf24, 0 0 120px rgba(251,191,36,0.5);
+    
+    /* --- UPDATE POSISI DASAR --- */
+    top: 10vh; /* Jarak dari atas layar saat di apex */
+    left: 50%;
+    margin-left: -55px; /* Tengahkan horizontal (setengah width) */
+
+    /* --- UPDATE TRANSISI MOBILITAS --- */
+    opacity: var(--sun-opacity);
+    transform: rotate(var(--sun-rotation));
+    transform-origin: center var(--celestial-pivot-y); /* Pusat putaran di horizon */
+    
+    /* Tambahkan transform ke transition agar mulus */
+    transition: opacity 1.5s ease, transform 1.5s ease-in-out;
 }
 
-/* --- BINTANG (MALAM HARI) --- */
+/* BINTANG (kedip) */
 .stars {
     width: 100%; height: 100%;
     position: relative;
-    opacity: 1; 
+    opacity: var(--star-opacity);
     transition: opacity 1.5s ease;
-}
-body.day-mode .stars {
-    opacity: 0; 
 }
 .star {
     position: absolute;
@@ -166,70 +215,163 @@ body.day-mode .stars {
     100% { opacity: 1; transform: scale(1.1); }
 }
 
-/* --- AWAN (SIANG HARI) --- */
+/* BINTANG JATUH */
+.shooting-stars {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: var(--shooting-star-opacity);
+    transition: opacity 1.5s ease;
+    pointer-events: none;
+}
+
+.shooting-star {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+    animation: shoot 4s linear infinite;
+    opacity: 0;
+}
+
+.shooting-star::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.8));
+    transform: translateY(-50%);
+}
+
+@keyframes shoot {
+    0% {
+        transform: rotate(-45deg) translateX(0) scale(0.5);
+        opacity: 0;
+    }
+    5% {
+        opacity: 1;
+        transform: rotate(-45deg) translateX(-50px) scale(1);
+    }
+    15% {
+        transform: rotate(-45deg) translateX(-250px) scale(0);
+        opacity: 0;
+    }
+    100% {
+        transform: rotate(-45deg) translateX(-250px) scale(0);
+        opacity: 0;
+    }
+}
+
+/* ========== AWAN (SIANG) ========== */
 .clouds {
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    opacity: 0; 
-    transition: opacity 1.5s ease 0.5s;
-}
-body.day-mode .clouds {
-    opacity: 1; 
+    opacity: var(--cloud-opacity);
+    transition: opacity 1.5s ease 0.3s;
 }
 
 .cloud {
     position: absolute;
     background: white;
     border-radius: 100px;
-    opacity: 0.85;
+    box-shadow: var(--cloud-shadow);  /* bayangan awan */
+    transition: box-shadow 1.5s ease;
 }
 .cloud::before, .cloud::after {
     content: '';
     position: absolute;
     background: white;
     border-radius: 50%;
+    box-shadow: inherit; /* ikut bayangan */
 }
 
-/* Awan 1: Kiri ke Kanan */
+/* Awan 1 */
 .cloud-1 {
     width: 120px; height: 40px;
-    top: 20%; 
+    top: 15%;
     left: -150px;
-    animation: gerakKanan 30s linear infinite;
+    animation: bounceRight1 22s ease-in-out infinite;
 }
 .cloud-1::before { width: 55px; height: 55px; top: -30px; left: 15px; }
 .cloud-1::after { width: 45px; height: 45px; top: -18px; left: 60px; }
 
-/* Awan 2: Kanan ke Kiri */
+/* Awan 2 */
 .cloud-2 {
     width: 100px; height: 35px;
-    top: 45%; 
+    top: 45%;
     right: -150px;
-    animation: gerakKiri 35s linear infinite;
-    opacity: 0.6;
+    animation: bounceLeft 28s ease-in-out infinite;
+    opacity: 0.85;
 }
 .cloud-2::before { width: 45px; height: 45px; top: -25px; left: 15px; }
 .cloud-2::after { width: 35px; height: 35px; top: -15px; left: 50px; }
 
-/* Awan 3: Kiri ke Kanan (Bawah) */
+/* Awan 3 */
 .cloud-3 {
     width: 80px; height: 28px;
-    top: 75%; 
-    left: -150px; 
-    animation: gerakKanan 25s linear infinite;
-    animation-delay: 5s;
+    top: 70%;
+    left: -150px;
+    animation: bounceRight2 25s ease-in-out infinite 2s;
 }
 .cloud-3::before { width: 38px; height: 38px; top: -20px; left: 12px; }
 .cloud-3::after { width: 30px; height: 30px; top: -12px; left: 45px; }
 
-/* Keyframes Animasi Awan */
-@keyframes gerakKanan {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(calc(100vw + 300px)); }
+/* Awan 4 */
+.cloud-4 {
+    width: 90px; height: 30px;
+    top: 12%;
+    right: -150px;
+    animation: bounceLeftSlow 35s ease-in-out infinite 5s;
+    opacity: 0.9;
 }
+.cloud-4::before { width: 40px; height: 40px; top: -22px; left: 10px; }
+.cloud-4::after { width: 32px; height: 32px; top: -12px; left: 50px; }
 
-@keyframes gerakKiri {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(calc(-100vw - 300px)); }
+/* Awan 5 */
+.cloud-5 {
+    width: 110px; height: 35px;
+    top: 55%;
+    left: -150px;
+    animation: bounceRight3 30s ease-in-out infinite 8s;
+}
+.cloud-5::before { width: 50px; height: 50px; top: -28px; left: 20px; }
+.cloud-5::after { width: 42px; height: 42px; top: -16px; left: 65px; }
+
+/* Animasi bounce awan */
+@keyframes bounceRight1 {
+    0%   { transform: translate(0, 0); }
+    25%  { transform: translate(30vw, -10px); }
+    50%  { transform: translate(55vw, 15px); }
+    75%  { transform: translate(80vw, -5px); }
+    100% { transform: translate(110vw, 0); }
+}
+@keyframes bounceRight2 {
+    0%   { transform: translate(0, 0); }
+    30%  { transform: translate(40vw, 20px); }
+    60%  { transform: translate(70vw, -15px); }
+    100% { transform: translate(105vw, 0); }
+}
+@keyframes bounceRight3 {
+    0%   { transform: translate(0, 0); }
+    20%  { transform: translate(25vw, -20px); }
+    50%  { transform: translate(60vw, 10px); }
+    80%  { transform: translate(90vw, -8px); }
+    100% { transform: translate(115vw, 0); }
+}
+@keyframes bounceLeft {
+    0%   { transform: translate(0, 0); }
+    30%  { transform: translate(-40vw, 10px); }
+    60%  { transform: translate(-70vw, -18px); }
+    100% { transform: translate(-110vw, 0); }
+}
+@keyframes bounceLeftSlow {
+    0%   { transform: translate(0, 0); }
+    40%  { transform: translate(-35vw, -15px); }
+    70%  { transform: translate(-65vw, 12px); }
+    100% { transform: translate(-105vw, 0); }
 }
