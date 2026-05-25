@@ -41,7 +41,7 @@ void setupWebServer() {
     }
   });
 
-  server.serveStatic("/", LittleFS, "/", "max-age=3600");
+  server.serveStatic("/", LittleFS, "/");
 
   server.onNotFound([]() {
     server.send(404, "text/plain", "Halaman tidak ditemukan");

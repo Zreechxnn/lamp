@@ -1,10 +1,24 @@
 :root {
+    /* --- WARNA MODE MALAM (DEFAULT) --- */
     --bg-color: #0f172a;
-    --card-bg: #1e293b;
+    --card-bg: rgba(30, 41, 59, 0.4); 
+    --card-border: rgba(255, 255, 255, 0.08);
     --success: #10b981;
     --danger: #ef4444;
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
+    --glass-blur: blur(12px);
+}
+
+body.day-mode {
+    /* --- WARNA MODE SIANG --- */
+    --bg-color: #38bdf8;
+    /* Kotak semi-transparan terang */
+    --card-bg: rgba(255, 255, 255, 0.3); 
+    --card-border: rgba(255, 255, 255, 0.3);
+    --text-main: #1e293b;
+    --text-muted: #475569;
+    --glass-blur: blur(10px);
 }
 
 body {
@@ -16,6 +30,8 @@ body {
     align-items: center;
     min-height: 100vh;
     margin: 0;
+    transition: background-color 1.5s ease-in-out, color 1s ease;
+    overflow: hidden; /* Mencegah scrollbar karena awan/tata surya bergerak di luar layar */
 }
 
 .card {
@@ -23,9 +39,16 @@ body {
     width: 90%;
     max-width: 350px;
     padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    border-radius: 24px;
+    /* Efek Kaca Buram (Glassmorphism) */
+    backdrop-filter: var(--glass-blur); 
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--card-border); 
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
     text-align: center;
+    transition: background 1.5s ease, border 1.5s ease, backdrop-filter 1.5s ease;
+    position: relative;
+    z-index: 10; /* Pastikan selalu di depan lapisan scenery */
 }
 
 .header {
@@ -43,8 +66,7 @@ body {
 }
 
 .dot {
-    width: 12px;
-    height: 12px;
+    width: 12px; height: 12px;
     border-radius: 50%;
     display: inline-block;
     transition: background-color 0.3s;
@@ -52,40 +74,162 @@ body {
 .dot.online { background-color: var(--success); box-shadow: 0 0 8px var(--success); }
 .dot.offline { background-color: var(--danger); }
 
+/* Ikon Lampu */
 .icon-container {
-    margin: 40px 0; /* Margin diperbesar karena tidak ada tombol di bawahnya */
+    margin: 40px 0;
     position: relative;
     display: flex;
     justify-content: center;
 }
 
 #bulbIcon {
-    width: 150px;
-    height: 150px;
+    width: 150px; height: 150px;
     overflow: visible;
-    cursor: pointer; /* Ubah kursor jadi tangan saat di-hover */
-    -webkit-tap-highlight-color: transparent; /* Hilangkan kotak biru/abu saat di-tap di HP */
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-/* Animasi membal saat ikon ditekan/diklik */
-#bulbIcon:active {
-    transform: scale(0.90);
-}
+#bulbIcon:active { transform: scale(0.92); } /* Animasi membal saat ditekan */
 
 .bulb-glass { fill: #475569; transition: fill 0.4s ease; }
 .bulb-base { fill: #94a3b8; }
 
 .nyala .bulb-glass {
     fill: #fbbf24;
-    filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.8));
+    filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.8)); /* Efek cahaya menyala */
 }
 
-.status-text {
-    font-size: 1.2rem;
-    margin-bottom: 10px;
+.status-text { font-size: 1.2rem; margin-bottom: 10px; }
+#status { letter-spacing: 1px; }
+
+.scenery {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 1; /* Berada tepat di belakang card */
+    pointer-events: none; /* Agar klik dari user tembus ke card */
 }
 
-#status {
-    letter-spacing: 1px;
+/* --- BULAN (MALAM HARI) --- */
+.moon {
+    position: absolute;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    box-shadow: inset -20px 5px 0 0px #e2e8f0; /* Membentuk bulan sabit */
+    top: 10%; 
+    left: 15%; /* Pojok kiri atas */
+    transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 1;
+}
+body.day-mode .moon {
+    top: 120%; /* Tenggelam ke bawah saat siang */
+    opacity: 0;
+}
+
+/* --- MATAHARI (SIANG HARI) --- */
+.sun {
+    position: absolute;
+    width: 110px; height: 110px;
+    background: #fcd34d;
+    border-radius: 50%;
+    box-shadow: 0 0 70px #fbbf24, 0 0 120px rgba(251, 191, 36, 0.5);
+    top: 120%; /* Sembunyi di bawah saat malam */
+    right: 15%; /* Pojok kanan atas */
+    left: auto;
+    transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+}
+body.day-mode .sun {
+    top: 10%; /* Terbit ke atas saat siang */
+    opacity: 1;
+}
+
+/* --- BINTANG (MALAM HARI) --- */
+.stars {
+    width: 100%; height: 100%;
+    position: relative;
+    opacity: 1; 
+    transition: opacity 1.5s ease;
+}
+body.day-mode .stars {
+    opacity: 0; 
+}
+.star {
+    position: absolute;
+    width: 3px; height: 3px;
+    background-color: white;
+    border-radius: 50%;
+    box-shadow: 0 0 8px white;
+    animation: twinkle 2s infinite alternate;
+}
+@keyframes twinkle {
+    0% { opacity: 0.3; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1.1); }
+}
+
+/* --- AWAN (SIANG HARI) --- */
+.clouds {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0; 
+    transition: opacity 1.5s ease 0.5s;
+}
+body.day-mode .clouds {
+    opacity: 1; 
+}
+
+.cloud {
+    position: absolute;
+    background: white;
+    border-radius: 100px;
+    opacity: 0.85;
+}
+.cloud::before, .cloud::after {
+    content: '';
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+}
+
+/* Awan 1: Kiri ke Kanan */
+.cloud-1 {
+    width: 120px; height: 40px;
+    top: 20%; 
+    left: -150px;
+    animation: gerakKanan 30s linear infinite;
+}
+.cloud-1::before { width: 55px; height: 55px; top: -30px; left: 15px; }
+.cloud-1::after { width: 45px; height: 45px; top: -18px; left: 60px; }
+
+/* Awan 2: Kanan ke Kiri */
+.cloud-2 {
+    width: 100px; height: 35px;
+    top: 45%; 
+    right: -150px;
+    animation: gerakKiri 35s linear infinite;
+    opacity: 0.6;
+}
+.cloud-2::before { width: 45px; height: 45px; top: -25px; left: 15px; }
+.cloud-2::after { width: 35px; height: 35px; top: -15px; left: 50px; }
+
+/* Awan 3: Kiri ke Kanan (Bawah) */
+.cloud-3 {
+    width: 80px; height: 28px;
+    top: 75%; 
+    left: -150px; 
+    animation: gerakKanan 25s linear infinite;
+    animation-delay: 5s;
+}
+.cloud-3::before { width: 38px; height: 38px; top: -20px; left: 12px; }
+.cloud-3::after { width: 30px; height: 30px; top: -12px; left: 45px; }
+
+/* Keyframes Animasi Awan */
+@keyframes gerakKanan {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(100vw + 300px)); }
+}
+
+@keyframes gerakKiri {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(-100vw - 300px)); }
 }

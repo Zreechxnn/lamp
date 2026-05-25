@@ -11,23 +11,26 @@ function updateUI(state, isConnected = true) {
         statusSpan.innerText = 'TERPUTUS';
         statusSpan.style.color = '#94a3b8';
         bulbIcon.classList.remove('nyala');
-        bulbIcon.style.pointerEvents = 'none'; // Matikan klik ikon kalau offline
+        bulbIcon.style.pointerEvents = 'none';
+        document.body.classList.remove('day-mode'); // Putus = Malam / Gelap
         return;
     }
 
     connectionDot.className = 'dot online';
-    bulbIcon.style.pointerEvents = 'auto'; // Aktifkan klik ikon
+    bulbIcon.style.pointerEvents = 'auto'; 
 
     if (state === 'ON') {
         currentState = 'ON';
         statusSpan.innerText = 'MENYALA';
         statusSpan.style.color = '#10b981';
         bulbIcon.classList.add('nyala');
+        document.body.classList.add('day-mode'); // Nyala = Siang
     } else if (state === 'OFF') {
         currentState = 'OFF';
         statusSpan.innerText = 'MATI';
         statusSpan.style.color = '#ef4444';
         bulbIcon.classList.remove('nyala');
+        document.body.classList.remove('day-mode'); // Mati = Malam
     }
 }
 
@@ -36,10 +39,10 @@ async function fetchState(url) {
         isFetching = true;
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000);
-        
+
         const response = await fetch(url, { signal: controller.signal });
         clearTimeout(timeoutId);
-        
+
         if (response.ok) {
             const data = await response.text();
             updateUI(data.trim(), true);
@@ -55,15 +58,14 @@ async function fetchState(url) {
 }
 
 function toggleLamp() {
-    if (isFetching) return; // Cegah spam klik jika ESP32 sedang memproses
+    if (isFetching) return; 
     const action = currentState === 'ON' ? 'off' : 'on';
     fetchState('/' + action);
 }
 
 window.onload = () => {
     fetchState('/status');
-    
-    // Jangan lakukan polling jika user sedang ngeklik (isFetching)
+
     setInterval(() => {
         if (!isFetching) fetchState('/status');
     }, 2000);
