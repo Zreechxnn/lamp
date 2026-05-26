@@ -4,6 +4,40 @@ const connectionDot = document.getElementById('connectionDot');
 
 let currentState = 'OFF';
 let isFetching = false;
+let ws = null;
+
+// Inisialisasi WebSocket
+function connectWebSocket() {
+  const wsUrl = `ws://${window.location.hostname}:81/`;
+  ws = new WebSocket(wsUrl);
+
+  ws.onopen = () => {
+    console.log('WebSocket connected');
+    connectionDot.className = 'dot online';
+  };
+
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.status === 'ON' || data.status === 'OFF') {
+        updateUI(data.status, true);
+      }
+    } catch (e) {
+      console.error('Invalid JSON:', e);
+    }
+  };
+
+  ws.onclose = () => {
+    console.log('WebSocket disconnected, retry in 3s');
+    connectionDot.className = 'dot offline';
+    setTimeout(connectWebSocket, 3000);
+  };
+
+  ws.onerror = (error) => {
+    console.error('WebSocket error:', error);
+    ws.close();
+  };
+}
 
 function updateUI(state, isConnected = true) {
     if (!isConnected) {
@@ -12,7 +46,7 @@ function updateUI(state, isConnected = true) {
         statusSpan.style.color = '#94a3b8';
         bulbIcon.classList.remove('nyala');
         bulbIcon.style.pointerEvents = 'none';
-        document.body.classList.remove('night-mode'); // reset
+        document.body.classList.remove('night-mode');
         return;
     }
 
@@ -69,8 +103,5 @@ function toggleLamp() {
 
 window.onload = () => {
     fetchState('/status');
-
-    setInterval(() => {
-        if (!isFetching) fetchState('/status');
-    }, 2000);
+    connectWebSocket();
 };

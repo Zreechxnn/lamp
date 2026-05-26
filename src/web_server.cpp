@@ -3,16 +3,19 @@
 #include "config.h"
 #include "led_control.h"
 #include "web_server.h"
+#include "mqtt_handler.h"
 
 WebServer server(80);
 
 void handleOn() {
   turnOnLED();
+  publishStatusMQTT("ON");
   server.send(200, "text/plain", "ON");
 }
 
 void handleOff() {
   turnOffLED();
+  publishStatusMQTT("OFF");
   server.send(200, "text/plain", "OFF");
 }
 
