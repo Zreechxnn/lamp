@@ -3,8 +3,8 @@
 #include "wifi_mdns.h"
 #include "led_control.h"
 #include "web_server.h"
-#include "mqtt_handler.h"
 #include "ws_handler.h"
+//#include "mqtt_handler.h"
 
 void setup() {
   Serial.begin(115200);
@@ -12,13 +12,12 @@ void setup() {
   setupWiFi();
   setupMDNS();
   setupWebServer();
-  setupMQTT();
   setupWebSocket();
-  
+  //setupMQTT();
 }
 
 void loop() {
   server.handleClient();
-  mqttLoop();
   webSocket.loop();
+  // HAPUS: mqttLoop();
 }
