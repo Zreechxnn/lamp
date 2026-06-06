@@ -14,9 +14,10 @@
     --bulb-glow: 0 0 60px 10px rgba(251, 191, 36, 0.7);
     --shooting-star-opacity: 1;
 
-    --moon-rotation: 0deg;
-    --sun-rotation: -110deg; 
-    --celestial-pivot-y: calc(100vh + 30vh); 
+    /* UBAH BAGIAN INI */
+    --moon-rotation: 0deg;       /* Bulan di atas (zenith) */
+    --sun-rotation: 180deg;      /* Matahari tersembunyi tepat di bawah */
+    --celestial-pivot-y: calc(100vh + 30vh);
 }
 
 body.day-mode {
@@ -34,9 +35,6 @@ body.day-mode {
     --sun-opacity: 1;
     --bulb-glow: 0 0 60px 10px rgba(251, 191, 36, 0.8);
     --shooting-star-opacity: 0;
-
-    --moon-rotation: 110deg;
-    --sun-rotation: 0deg;
 }
 
 body {

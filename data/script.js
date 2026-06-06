@@ -3,6 +3,8 @@ const bulbIcon = document.getElementById('bulbIcon');
 const connectionDot = document.getElementById('connectionDot');
 
 let currentState = 'OFF';
+let moonRotation = 0;
+let sunRotation = 180;
 let isFetching = false;
 let ws = null;
 
@@ -52,6 +54,13 @@ function updateUI(state, isConnected = true) {
 
     connectionDot.className = 'dot online';
     bulbIcon.style.pointerEvents = 'auto';
+
+    if (state !== currentState && (state === 'ON' || state === 'OFF')) {
+        moonRotation += 180;
+        sunRotation += 180;
+        document.documentElement.style.setProperty('--moon-rotation', `${moonRotation}deg`);
+        document.documentElement.style.setProperty('--sun-rotation', `${sunRotation}deg`);
+    }
 
     if (state === 'ON') {
         document.querySelector('.icon-container').classList.add('nyala');
